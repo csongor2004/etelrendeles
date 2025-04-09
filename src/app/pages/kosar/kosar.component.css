@@ -1,0 +1,43 @@
+.kosar-kartya, .ures-kosar-kartya {
+    margin-top: 20px;
+  }
+  
+  .kosar-tabla {
+    width: 100%;
+  }
+  
+  .osszesen {
+    margin-top: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+  }
+  
+  .ures-kosar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px;
+    color: rgba(0, 0, 0, 0.54);
+  }
+  
+  .ures-kosar mat-icon {
+    font-size: 48px;
+    height: 48px;
+    width: 48px;
+    margin-bottom: 16px;
+  }
+  
+  /* Reszponzív megjelenés */
+  @media (max-width: 768px) {
+    .osszesen {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .osszesen button {
+      margin-top: 12px;
+      width: 100%;
+    }
+  }

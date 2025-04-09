@@ -1,0 +1,28 @@
+<div class="register-container">
+  <h1>Create Account</h1>
+  <form class="register-form" [formGroup]="registerForm" (ngSubmit)="register()">
+
+    <mat-form-field appearance="outline" floatLabel="always"> <mat-label>Email</mat-label>
+      <input matInput formControlName="email">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" floatLabel="always"> <mat-label>Password</mat-label>
+      <input matInput type="password" formControlName="password">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" floatLabel="always"> <mat-label>Confirm Password</mat-label>
+      <input matInput type="password" formControlName="rePassword">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" floatLabel="always"> <mat-label>Name</mat-label>
+      <input matInput formControlName="name">
+    </mat-form-field>
+
+    <div *ngIf="registerError" class="error-message">{{ registerError }}</div>
+
+    <div class="buttons-row">
+      <button mat-flat-button color="primary" type="submit" [disabled]="isLoading">Register</button>
+      <button mat-flat-button type="button" (click)="navigateToLogin()">Login</button>
+    </div>
+  </form>
+</div>

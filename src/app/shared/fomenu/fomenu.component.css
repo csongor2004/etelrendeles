@@ -1,0 +1,64 @@
+.menu-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  gap: 3rem;
+  padding: 20px 0;
+}
+
+.menu-button {
+  color: white !important;
+  height: 100%;
+  width: 100px;
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+}
+
+.icon-circle {
+  background-color: #2979ff;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.button-text {
+  font-weight: bold;
+  font-size: 1.1rem;
+  text-align: center;
+  white-space: normal;
+  line-height: 1.2;
+  color: #333;
+}
+
+.active-link .icon-circle {
+  background-color: #1565c0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.active-link .button-text {
+  color: #1565c0;
+}
+
+.mat-icon {
+  color: white;
+  font-size: 28px;
+  height: 28px;
+  width: 28px;
+}
+
+.menu-button:hover .icon-circle {
+  background-color: #5393ff;
+  transform: scale(1.05);
+  transition: all 0.2s ease;
+}
+
+.menu-button:hover .button-text {
+  color: #1565c0;
+}
