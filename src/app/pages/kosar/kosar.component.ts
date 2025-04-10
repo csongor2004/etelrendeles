@@ -54,12 +54,12 @@ export class KosarComponent implements OnChanges {
   }
   
   updateFormItems(): void {
-    // Clear the existing form array
+   
     while (this.tetelekArray.length) {
       this.tetelekArray.removeAt(0);
     }
     
-    // Add new form groups for each item
+   
     this.tetelek.forEach(tetel => {
       this.tetelekArray.push(
         this.fb.group({
@@ -100,7 +100,7 @@ export class KosarComponent implements OnChanges {
 
   submitOrder(): void {
     if (this.kosarForm.valid && this.tetelek.length > 0) {
-      // Convert form value to KosarTetel array if needed
+     
       this.rendelesTeljesites.emit(this.tetelek);
     }
   }

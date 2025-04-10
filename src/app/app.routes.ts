@@ -7,18 +7,18 @@ import { ModositasComponent } from './pages/modositas/modositas.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { RendelesComponent } from './pages/rendeles/rendeles.component';
 import { ProfilComponent } from './pages/profil/profil.component';
-import { RendeleslistazComponent } from './pages/rendeleslistaz/rendeleslistaz.component';
-import { FomenuComponent } from './shared/fomenu/fomenu.component';
+import { AuthGuard } from './guards/auth.guard';
+import { RendeleslistazComponent } from './pages/rendeleslistaz/rendeleslistaz.component'; // Importáld a RendeleslistazComponent-et
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
-  { path: 'rendeles', component: RendelesComponent },
-  { path: 'kosar', component: KosarComponent },
-  { path: 'profil', component: ProfilComponent },
-  { path: 'modositas', component: ModositasComponent },
   { path: 'register', component: RegisterComponent },
-  { path: 'home', component: HomeComponent },
-  { path: 'rendeleslistaz', component: RendeleslistazComponent },
+  { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
+  { path: 'rendeles', component: RendelesComponent, canActivate: [AuthGuard] },
+  { path: 'kosar', component: KosarComponent, canActivate: [AuthGuard] },
+  { path: 'profil', component: ProfilComponent, canActivate: [AuthGuard] },
+  { path: 'modositas', component: ModositasComponent, canActivate: [AuthGuard] },
+  { path: 'rendeleslistaz', component: RendeleslistazComponent, canActivate: [AuthGuard] }, // Add this line
   { path: '**', redirectTo: 'login' }
 ];

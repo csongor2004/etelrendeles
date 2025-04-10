@@ -107,36 +107,36 @@ export class RendelesComponent implements OnInit {
       this.snackBar.open('A kosár üres', 'OK', { duration: 3000 });
       return;
     }
-  
+
     this.isLoading = true;
     const osszeg = tetelek.reduce((sum, item) => sum + (item.ar * item.mennyiseg), 0);
-    
+
     // Create the Rendeles object
     const ujRendeles: Rendeles = {
       email: this.currentUser?.email || '',
       osszeg: osszeg,
       datum: new Date()
     };
-  
+
     this.foodService.addOrderToFirebase(tetelek, osszeg).subscribe({
       next: () => {
         // Increment the user's order count when the order is successful
         this.orderService.incrementOrderCountForCurrentUser()
           .then(() => {
-            this.snackBar.open('Rendelés sikeresen leadva!', 'OK', { duration: 3000 });
+            this.snackBar.open('Rendelés sikeresen leadva!', 'OK', { /* duration: 3000, */ }); // Eltávolítva a duration vagy csökkentve
             this.kosarTetelek = [];
             this.isLoading = false;
           })
           .catch(error => {
             console.error('Hiba a rendelésszám növelésekor:', error);
-            this.snackBar.open('Rendelés leadva, de a rendelésszám frissítése sikertelen', 'OK', { duration: 3000 });
+            this.snackBar.open('Rendelés leadva, de a rendelésszám frissítése sikertelen', 'OK', { /* duration: 3000, */ }); // Eltávolítva a duration vagy csökkentve
             this.kosarTetelek = [];
             this.isLoading = false;
           });
       },
       error: (error) => {
         console.error('Hiba a rendelés leadásakor:', error);
-        this.snackBar.open('Hiba a rendelés leadásakor', 'OK', { duration: 3000 });
+        this.snackBar.open('Hiba a rendelés leadásakor', 'OK', { /* duration: 3000, */ }); // Eltávolítva a duration vagy csökkentve
         this.isLoading = false;
       }
     });

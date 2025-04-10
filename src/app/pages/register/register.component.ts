@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-register',
@@ -27,7 +28,10 @@ export class RegisterComponent {
   isLoading = false;
   registerError = '';
 
-  constructor(private router: Router) {
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {
     this.registerForm = new FormGroup({
       email: new FormControl('', [Validators.required, Validators.email]),
       password: new FormControl('', [Validators.required, Validators.minLength(6)]),
@@ -36,30 +40,35 @@ export class RegisterComponent {
     });
   }
 
-  register(): void {
+  async register(): Promise<void> {
     if (this.registerForm.invalid) {
-      this.registerError = 'Please correct the form errors before submitting.';
+      this.registerError = 'Kérlek, javítsd a formon lévő hibákat.';
       return;
     }
     const password = this.registerForm.get('password')?.value;
     const rePassword = this.registerForm.get('rePassword')?.value;
     if (password !== rePassword) {
-      this.registerError = 'Passwords do not match!';
+      this.registerError = 'A jelszavak nem egyeznek!';
       return;
     }
-    const newUser = {
-      name: this.registerForm.value.name,
-      email: this.registerForm.value.email,
-      password: this.registerForm.value.password
-    };
-    const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
-    if (existingUsers.some((u: any) => u.email === newUser.email)) {
-      this.registerError = 'Email already exists!';
-      return;
+
+    this.isLoading = true;
+    this.registerError = '';
+    const { email, name } = this.registerForm.value;
+
+    try {
+      await this.authService.register(email, password, name);
+      this.router.navigateByUrl('/login'); // Sikeres regisztráció után a bejelentkezési oldalra irányít
+    } catch (error: any) {
+      console.error('Hiba a regisztráció során:', error);
+      if (error.code === 'auth/email-already-in-use') {
+        this.registerError = 'Ez az email cím már használatban van.';
+      } else {
+        this.registerError = 'Hiba a regisztráció során. Próbáld újra később.';
+      }
+    } finally {
+      this.isLoading = false;
     }
-    existingUsers.push(newUser);
-    localStorage.setItem('users', JSON.stringify(existingUsers));
-    this.router.navigateByUrl('/login');
   }
 
   navigateToLogin(): void {

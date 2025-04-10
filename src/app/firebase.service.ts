@@ -1,13 +1,19 @@
+// src/app/services/firebase.service.ts
 import { Injectable } from '@angular/core';
+
 import { Firestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc } from '@angular/fire/firestore';
+
 import { Observable, from } from 'rxjs';
+
 import { map, switchMap } from 'rxjs/operators';
+
 import { Etel, KosarTetel, Rendeles, User } from './services/interfaces';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FirebaseService {
+
   constructor(private firestore: Firestore) {}
 
   // Ételek lekérése
@@ -18,7 +24,7 @@ export class FirebaseService {
         snapshot.docs.map(doc => {
           const data = doc.data();
           return {
-            id: data['id'] || parseInt(doc.id), 
+            id: data['id'] || parseInt(doc.id),
             nev: data['nev'] || '',
             ar: data['ar'] || 0,
             kep: data['kep'] || ''
@@ -35,7 +41,7 @@ export class FirebaseService {
       map(snapshot => {
         const userDoc = snapshot.docs.find(doc => doc.data()['email'] === email);
         if (!userDoc) return null;
-        
+
         const data = userDoc.data();
         return {
           email: data['email'] || '',
@@ -74,27 +80,24 @@ export class FirebaseService {
       switchMap(snapshot => {
         const userDoc = snapshot.docs.find(doc => doc.data()['email'] === email);
         if (!userDoc) throw new Error('Felhasználó nem található');
-        
+
         const userRef = doc(this.firestore, 'users', userDoc.id);
         return from(updateDoc(userRef, { name: newName }));  // Itt javítottam name mezőnevet
       })
     );
   }
 
-  // Rendelés törlése
   rendelesTorles(rendelesId: string): Observable<void> {
     const rendelesRef = doc(this.firestore, 'rendelesek', rendelesId);
     return from(deleteDoc(rendelesRef));
   }
 
-  // Rendelésszám növelés
   novelRendelesSzam(email: string): Observable<void> {
     const users = collection(this.firestore, 'users');
     return from(getDocs(users)).pipe(
       switchMap(snapshot => {
         const userDoc = snapshot.docs.find(doc => doc.data()['email'] === email);
         if (!userDoc) throw new Error('Felhasználó nem található');
-
         const userRef = doc(this.firestore, 'users', userDoc.id);
         const ujRendelesSzam = userDoc.data()['rendelesek_szama'] + 1;  // Itt javítottam mezőnevet
         return from(updateDoc(userRef, { rendelesek_szama: ujRendelesSzam }));

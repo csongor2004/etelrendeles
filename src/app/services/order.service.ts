@@ -21,22 +21,22 @@ export class OrderService {
           // Find the user document by email
           const usersRef = collection(this.firestore, 'users');
           const q = query(usersRef, where("email", "==", user.email));
-          
+
           getDocs(q).then(snapshot => {
             if (!snapshot.empty) {
               const userDoc = snapshot.docs[0];
               const userRef = doc(this.firestore, 'users', userDoc.id);
-              
+
               // Increment the orders count
-              updateDoc(userRef, { 
-                rendelesek_szama: increment(1) 
+              updateDoc(userRef, {
+                rendelesek_szama: increment(1)
               }).then(() => {
                 // Also update the user in the app state
                 const updatedUser = {
                   ...user,
                   rendelesekSzama: (user.rendelesekSzama || 0) + 1
                 };
-                
+
                 this.authService.setUser(updatedUser);
                 console.log("Order count incremented successfully:", updatedUser.rendelesekSzama);
                 resolve();
