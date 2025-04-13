@@ -1,0 +1,99 @@
+/* You can add global styles to this file, and also import other style files */
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/* Responsive Grid Layout */
+.container {
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -15px;
+  margin-left: -15px;
+}
+
+/* Mobile First - alapértelmezetten a kis képernyőre optimalizált */
+.col-md-4, .col-md-8 {
+  position: relative;
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+/* Tablet és nagyobb eszközök (768px felett) */
+@media (min-width: 768px) {
+  .container {
+    max-width: 720px;
+  }
+
+  .col-md-4 {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+  }
+  
+  .col-md-8 {
+    flex: 0 0 66.666667%;
+    max-width: 66.666667%;
+  }
+}
+
+/* Laptop és nagyobb eszközök (992px felett) */
+@media (min-width: 992px) {
+  .container {
+    max-width: 960px;
+  }
+}
+
+/* Nagy képernyő (1200px felett) */
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1140px;
+  }
+}
+
+/* Egyedi komponens stílusok, amelyek globálisan használhatók */
+.etelek-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.etel-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.etel-kep {
+  height: 180px;
+  object-fit: cover;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  padding: 30px;
+}
+
+.rendeles-button {
+  width: 100%;
+  margin-top: 20px;
+}
+
+/* Mobilon teljes szélességű gomb legyen */
+@media (max-width: 767px) {
+  button.mat-raised-button {
+    width: 100%;
+  }
+  
+  .etelek-grid {
+    grid-template-columns: 1fr;
+  }
+}

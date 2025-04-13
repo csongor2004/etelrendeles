@@ -1,0 +1,9 @@
+<div *ngIf="authService.currentUserProfile$ | async as userProfile">
+
+      <h1>Udvozlunk, {{ userProfile.nev }}!</h1>
+  
+      <p>Hasznald a felso menut az oldal kivalasztasahoz</p>
+  
+    </div>
+  
+  

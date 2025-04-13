@@ -1,0 +1,103 @@
+/* profil.component.css */
+.container {
+  max-width: 600px; /* Csökkentett maximális szélesség a jobb olvashatóságért */
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.page-title {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #3f51b5;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 40px 0;
+}
+
+.profile-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Csökkentett távolság */
+}
+
+.profile-card {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.profile-avatar {
+  overflow: hidden;
+  width: 60px; /* Nagyobb avatar méret */
+  height: 60px; /* Nagyobb avatar méret */
+  border-radius: 50%;
+  margin-right: 16px;
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+mat-card-header {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+}
+
+mat-card-title {
+  margin-bottom: 0 !important;
+}
+
+mat-card-content {
+  padding: 16px;
+}
+
+mat-form-field {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+button[type="submit"] {
+  min-width: 120px;
+}
+
+mat-card-actions {
+  display: flex;
+  justify-content: space-between; /* Gombok szétrendezése */
+  padding: 16px;
+}
+
+mat-card-actions button {
+  flex-grow: 1; /* Gombok egyenlő szélességűek lesznek */
+  margin: 0 8px; /* Kis margó a gombok között */
+}
+
+mat-card-actions button:first-child {
+  margin-left: 0;
+}
+
+mat-card-actions button:last-child {
+  margin-right: 0;
+}
+
+@media (max-width: 600px) {
+  .profile-actions {
+    flex-direction: column; /* Mobilon egymás alá kerülnek a gombok */
+  }
+
+  .profile-actions button {
+    margin: 8px 0;
+  }
+}

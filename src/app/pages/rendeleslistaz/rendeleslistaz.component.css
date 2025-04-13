@@ -1,0 +1,41 @@
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  h2 {
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    margin: 40px 0;
+  }
+  
+  .sort-button {
+    margin: 20px 0;
+  }
+  
+  .no-orders {
+    text-align: center;
+    margin: 40px 0;
+    color: #666;
+  }
+  
+  .orders-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .order-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  mat-card-content {
+    padding: 16px;
+  }

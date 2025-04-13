@@ -1,0 +1,49 @@
+<div class="container">
+    <h1>Új étel hozzáadása</h1>
+  
+    <div *ngIf="isLoading" class="loading-spinner">
+      <mat-spinner></mat-spinner>
+    </div>
+  
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Étel adatok</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="etelForm" (ngSubmit)="onSubmit()">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Étel neve</mat-label>
+            <input matInput formControlName="nev" placeholder="Pl: Pizza Margherita">
+            <mat-error *ngIf="etelForm.get('nev')?.hasError('required')">
+              Az étel neve kötelező
+            </mat-error>
+          </mat-form-field>
+  
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Ár (Ft)</mat-label>
+            <input matInput type="number" formControlName="ar" placeholder="Pl: 2500">
+            <mat-error *ngIf="etelForm.get('ar')?.hasError('required')">
+              Az étel ára kötelező
+            </mat-error>
+            <mat-error *ngIf="etelForm.get('ar')?.hasError('min')">
+              Az ár nem lehet nulla vagy negatív
+            </mat-error>
+          </mat-form-field>
+  
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Kép URL</mat-label>
+            <input matInput formControlName="kep" placeholder="Pl: https://example.com/pizza.jpg">
+            <mat-error *ngIf="etelForm.get('kep')?.hasError('required')">
+              A kép URL kötelező
+            </mat-error>
+          </mat-form-field>
+  
+          <div class="button-row">
+            <button mat-raised-button color="primary" type="submit" [disabled]="etelForm.invalid || isLoading">
+              Étel hozzáadása
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>

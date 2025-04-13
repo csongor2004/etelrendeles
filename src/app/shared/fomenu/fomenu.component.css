@@ -1,0 +1,88 @@
+.menu-container {
+  display: flex;
+  justify-content: space-around; /* Kiegyenlíti a gombokat */
+  width: 100%;
+  padding: 10px; /* Csökkentett padding a kisebb képernyőkhöz */
+  background-color: #f8f8f8; /* Világos háttér a jobb láthatóságért */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24); /* Finom árnyék */
+}
+
+.menu-button {
+  color: #333 !important; /* Sötét szín a szöveghez */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  padding: 8px; /* Kisebb padding a gombok körül */
+  border-radius: 8px; /* Lekerekített sarkok */
+  transition: background-color 0.3s ease; /* Áttűnés a hover effekthez */
+  min-width: 80px; /* Minimális szélesség a szöveg elféréséhez */
+}
+
+.menu-button:hover {
+  background-color: #e0e0e0; /* Világosabb háttér hoverre */
+}
+
+.icon-circle {
+  background-color: #2979ff;
+  border-radius: 50%;
+  width: 40px; /* Kisebb ikon méret */
+  height: 40px; /* Kisebb ikon méret */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 5px; /* Kisebb margó az ikon alatt */
+}
+
+.button-text {
+  font-weight: bold;
+  font-size: 0.9rem; /* Kisebb betűméret */
+  text-align: center;
+  white-space: nowrap; /* Megakadályozza a szöveg törését */
+  color: #333;
+}
+
+.mat-icon {
+  color: white;
+  font-size: 24px; /* Kisebb ikon méret */
+  height: 24px; /* Kisebb ikon méret */
+  width: 24px; /* Kisebb ikon méret */
+}
+
+.active-link .icon-circle {
+  background-color: #1565c0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.active-link .button-text {
+  color: #1565c0;
+}
+
+/* Kisebb képernyőkre (telefonokra) */
+@media (max-width: 600px) {
+  .menu-container {
+    justify-content: space-around;
+    padding: 8px;
+  }
+
+  .menu-button {
+    min-width: 60px;
+    padding: 6px;
+  }
+
+  .icon-circle {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 3px;
+  }
+
+  .mat-icon {
+    font-size: 20px;
+    height: 20px;
+    width: 20px;
+  }
+
+  .button-text {
+    font-size: 0.8rem;
+  }
+}

@@ -1,0 +1,32 @@
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 2rem;
+}
+
+.login-container h2 {
+  margin-bottom: 1rem;
+}
+
+.login-container form {
+  width: 100%;
+  max-width: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.login-container mat-form-field {
+  margin-bottom: 1rem;
+}
+
+.login-container button[type="submit"] {
+  margin-top: 1rem;
+}
+
+.login-container .error-message {
+  color: red;
+  margin-top: 1rem;
+}
