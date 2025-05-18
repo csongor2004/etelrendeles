@@ -1,26 +1,20 @@
 import { Pipe, PipeTransform } from '@angular/core';
-
-interface Rendeles {
-  id: string;
-  rendelo: string;
-  ar: number;
-  datum: Date;
-}
+import { Rendeles } from '../services/interfaces';
 
 @Pipe({
-  name: 'rendelesSort',
-  standalone: true
+  name: 'rendelesSort',
+  standalone: true
 })
 export class RendelesSortPipe implements PipeTransform {
-  transform(rendelesek: Rendeles[], ascending: boolean = true): Rendeles[] {
-    if (!rendelesek || rendelesek.length === 0) return [];
-    
-    return [...rendelesek].sort((a, b) => {
-      if (ascending) {
-        return a.ar - b.ar;
-      } else {
-        return b.ar - a.ar;
-      }
-    });
-  }
+  transform(rendelesek: Rendeles[], ascending: boolean = true): Rendeles[] {
+    if (!rendelesek || rendelesek.length === 0) return [];
+
+    return [...rendelesek].sort((a, b) => {
+      if (ascending) {
+        return a.osszeg - b.osszeg;
+      } else {
+        return b.osszeg - a.osszeg;
+      }
+    });
+  }
 }

@@ -1,125 +1,152 @@
-// src/app/pages/profil/profil.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatTableModule } from '@angular/material/table';
-import { MatInputModule } from '@angular/material/input';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthService } from '../../services/auth.service';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { FirebaseService } from '../../../firebase.service';
+import { User } from '../../services/interfaces';
+import { takeUntil, tap } from 'rxjs/operators'; // tap hozzáadva a betöltéskezeléshez
+import { Subject } from 'rxjs'; // Subject hozzáadva a leiratkozáshoz
+
+// Angular Material modulok
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { User } from '../../services/interfaces';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar } from '@angular/material/snack-bar'; // MatSnackBar hozzáadva
 
 @Component({
-  selector: 'app-profil',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    ReactiveFormsModule,
-    MatTableModule,
-    MatSnackBarModule,
-    MatProgressSpinnerModule
-  ],
-  templateUrl: './profil.component.html',
-  styleUrls: ['./profil.component.css']
+  selector: 'app-profil',
+  standalone: true,
+  templateUrl: './profil.component.html',
+  styleUrls: ['./profil.component.css'],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatProgressSpinnerModule
+  ]
 })
 export class ProfilComponent implements OnInit {
-  profileForm!: FormGroup;
-  currentUser: User | null = null;
-  isLoading = true;
+  currentUser: User | null = null;
+  profileForm!: FormGroup;
+  isLoading: boolean = true; // Alapértelmezetten true, amíg betöltődnek az adatok
+  errorMessage: string | null = null;
 
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-    private fb: FormBuilder,
-    private snackBar: MatSnackBar
-  ) { }
+  private destroy$ = new Subject<void>(); // Leiratkozáshoz
 
-  ngOnInit(): void {
-    console.log("ProfilComponent initializing...");
+  constructor(
+    private authService: AuthService,
+    private firebaseService: FirebaseService,
+    private formBuilder: FormBuilder,
+    private router: Router,
+    private snackBar: MatSnackBar // MatSnackBar injektálása
+  ) { }
 
-    this.authService.currentUserProfile$.subscribe({
-      next: (user: User | null) => {
-        console.log("User data received:", user);
+  ngOnInit(): void {
+    // FormGroup inicializálása az összes mezővel, a rendelésszám disabled
+    this.profileForm = this.formBuilder.group({
+      email: [{ value: '', disabled: true }, [Validators.required, Validators.email]],
+      nev: ['', [Validators.required, Validators.minLength(2)]],
+      jelszo: ['', [Validators.minLength(6)]],
+      rendelesekSzama: [{ value: 0, disabled: true }] // Rendelésszám disabled és alapértelmezett értékkel
+    });
 
-        if (!user) {
-          console.log("No user data, redirecting to login");
-          this.router.navigate(['/login']);
-          return;
-        }
+    // Felhasználó adatainak figyelése
+    this.authService.currentUserProfile$.pipe(
+      tap(user => {
+        // Amikor új felhasználói adat érkezik, beállítjuk a formot és befejezzük a betöltést
+        this.currentUser = user;
+        if (user) {
+          this.profileForm.patchValue({
+            email: user.email,
+            nev: user.nev,
+            rendelesekSzama: user.rendelesekSzama || 0 // Biztosítjuk, hogy 0 legyen, ha nincs adat
+          });
+          this.isLoading = false; // Adatok betöltve, kikapcsoljuk a betöltést
+        } else {
+          // Ha nincs felhasználó (pl. kijelentkezett), visszaállítjuk az alapállapotot
+          this.profileForm.reset();
+          this.isLoading = false;
+          this.router.navigate(['/login']); // Átirányítás a bejelentkezésre
+        }
+      }),
+      takeUntil(this.destroy$) // Leiratkozás a komponens megsemmisülésekor
+    ).subscribe();
+  }
 
-        this.currentUser = user;
-        this.initForm();
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error("Error fetching user data:", error);
-        this.isLoading = false;
-      }
-    });
-  }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
-  initForm(): void {
-    if (!this.currentUser) {
-      console.log("Cannot initialize form: current user is null");
-      return;
-    }
+  async onSubmit(): Promise<void> {
+    Object.keys(this.profileForm.controls).forEach(key => {
+      this.profileForm.get(key)?.markAsTouched();
+    });
 
-    console.log("Initializing form with user data:", this.currentUser);
+    if (this.profileForm.invalid) {
+      this.snackBar.open('Kérlek, javítsd a formon lévő hibákat.', 'OK', { duration: 3000 });
+      return;
+    }
 
-    this.profileForm = this.fb.group({
-      email: [{ value: this.currentUser.email, disabled: true }],
-      nev: [this.currentUser.nev, [Validators.required, Validators.minLength(3)]],
-      jelszo: ['', [Validators.minLength(6)]], // Hozzáadtuk a jelszó mezőt
-      rendelesekSzama: [{ value: this.currentUser.rendelesekSzama, disabled: true }]
-    });
-  }
+    if (!this.currentUser || !this.currentUser.email) {
+      this.snackBar.open('Nincs bejelentkezett felhasználó.', 'OK', { duration: 3000 });
+      return;
+    }
 
-  onSubmit(): void {
-    if (this.profileForm.invalid) {
-      console.log("Form is invalid, not submitting");
-      return;
-    }
+    const { nev, jelszo } = this.profileForm.getRawValue(); // getRawValue a disabled mezőket is lekéri
+    this.isLoading = true;
+    this.errorMessage = null; // Hibaüzenet törlése
 
-    const newName = this.profileForm.get('nev')?.value;
-    const newPassword = this.profileForm.get('jelszo')?.value;
+    try {
+      // Név frissítése, ha megváltozott
+      if (nev !== this.currentUser.nev) {
+        await this.firebaseService.updateUserName(this.currentUser.email, nev).toPromise();
+        console.log('Név sikeresen frissítve a Firestore-ban.');
+        // Alkalmazás állapot frissítése
+        if (this.currentUser) this.currentUser.nev = nev;
+      }
 
-    if (this.currentUser && this.currentUser.email && newName) {
-      console.log("Submitting form with new name:", newName);
-      this.isLoading = true;
+      // Jelszó frissítése (csak ha meg van adva új jelszó)
+      if (jelszo) {
+        // Itt kellene a Firebase Authentication updatePassword metódusát hívni
+        // Pl: await updatePassword(this.authService.auth.currentUser, jelszo);
+        // Fontos: ehhez újra kell hitelesíteni a felhasználót biztonsági okokból
+        console.warn('Jelszó frissítés nincs implementálva a demóban.');
+        this.snackBar.open('Jelszó frissítés nincs implementálva.', 'OK', { duration: 3000 });
+        // throw new Error('Jelszó frissítés nincs implementálva.'); // Vagy dobj hibát
+      }
 
-      this.authService.updateUserName(this.currentUser.email, newName)
-        .then(() => {
-          console.log("Name updated successfully");
-          this.snackBar.open('A név sikeresen frissítve!', 'OK', { duration: 3000 });
-          // Itt lehetne kezelni a jelszó frissítését is, ha a newPassword nem üres
-          if (newPassword) {
-            console.log("Új jelszó megadva, a jelszófrissítés implementálása itt történhet.");
-            this.snackBar.open('A jelszó frissítésének implementálása itt történhet meg.', 'Figyelem!', { duration: 5000 });
-            // **Fontos:** A jelszó frissítéséhez további logika szükséges a Firebase Auth-ban.
-          }
-          this.isLoading = false;
-        })
-        .catch(error => {
-          console.error('Hiba történt a név frissítésekor:', error);
-          this.snackBar.open('Hiba történt a név frissítésekor', 'OK', { duration: 3000 });
-          this.isLoading = false;
-        });
-    }
-  }
+      // Frissítjük a felhasználót az AuthService-ben is, ami frissíti a localStorage-t
+      // Ez fontos, hogy a rendelésszám növelés is frissítse a UI-t
+      if (this.currentUser) {
+        this.authService.setUser({ ...this.currentUser }); // Új objektumot adunk át a változás érzékeléséhez
+      }
 
-  navigateToOrders(): void {
-    this.router.navigate(['/rendeleslistaz']);
-  }
+      console.log('Profil sikeresen frissítve.');
+      this.snackBar.open('Profil sikeresen frissítve!', 'OK', { duration: 3000 });
 
-  logout(): void {
-    this.authService.logout();
-  }
+    } catch (error: any) {
+      console.error('Hiba a profil frissítésekor:', error);
+      this.errorMessage = error.message || 'Hiba történt a profil frissítése során.';
+      this.snackBar.open("", 'OK', { duration: 3000 });
+    } finally {
+      this.isLoading = false;
+      // Jelszó mező ürítése biztonsági okokból
+      this.profileForm.get('jelszo')?.reset();
+    }
+  }
+
+  navigateToOrders(): void {
+    this.router.navigate(['/rendeleslistaz']);
+  }
+
+  logout(): void {
+    this.authService.logout();
+  }
 }

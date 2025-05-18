@@ -1,180 +1,177 @@
 import { Injectable } from '@angular/core';
-import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, User as FirebaseUser, signOut, setPersistence, browserSessionPersistence } from '@angular/fire/auth';
-import { BehaviorSubject, Observable, from, of, throwError } from 'rxjs';
-import { User } from './interfaces';
-import { Firestore, collection, query, where, getDocs, addDoc, doc, updateDoc } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
-import { switchMap, catchError, tap } from 'rxjs/operators';
-import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, from, throwError } from 'rxjs';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, UserCredential } from '@angular/fire/auth';
+import { Firestore, collection, doc, getDoc, setDoc, query, where, getDocs } from '@angular/fire/firestore';
+import { User } from './interfaces';
+import { UserService } from './user.service'; // Import UserService
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root'
 })
 export class AuthService {
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
-  currentUserProfile$: Observable<User | null> = this.currentUserSubject.asObservable();
-  user$ = this.currentUserProfile$;
+  private userSubject = new BehaviorSubject<User | null>(null);
+  currentUserProfile$ = this.userSubject.asObservable();
 
-  constructor(
-    private auth: Auth,
-    private firestore: Firestore,
-    private router: Router,
-    private http: HttpClient
-  ) {
-    // Beállítjuk, hogy az autentikáció ne maradjon meg a böngésző bezárása/frissítése után
-    setPersistence(this.auth, browserSessionPersistence)
-      .then(() => {
-        this.auth.onAuthStateChanged(user => {
-          if (user) {
-            this.getUserProfile(user.email!).catch(() => {
-              this.setUser(null);
-            });
-          } else {
-            this.setUser(null);
-            // Biztosítsuk, hogy minden egyéb helyi tárolást is töröljünk
-            this.clearSessionStorage();
-          }
-        });
-      })
-      .catch(() => {
-        // Kezelhetjük itt a perzisztencia beállításának hibáját, ha szükséges
-      });
-    
-    // Eltávolítjuk a localStorage használatát a bejelentkezési adatok betöltésénél
-    // this.loadSessionFromLocalStorage();
-    
-    // Eseményfigyelő hozzáadása a böngészőablak bezárására/frissítésére
-    window.addEventListener('beforeunload', () => {
-      this.clearSessionStorage();
-      this.setUser(null);
-    });
-  }
+  constructor(
+    private auth: Auth,
+    private firestore: Firestore,
+    private router: Router,
+    private userService: UserService // Injektáljuk a UserService-t
+  ) {
+    // Felhasználó ellenőrzése indulásnál a localStorage-b\u00f3l (csak cache)
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      // Rögtön kibocsátjuk a cachelt felhasználót, hogy gyorsabban megjelenjen a UI
+      this.userSubject.next(JSON.parse(storedUser));
+    }
 
-  private loadUsersFromLocalStorage(): User[] {
-    const usersString = localStorage.getItem('users');
-    return usersString ? JSON.parse(usersString) : [];
-  }
+    // Figyeljük a Firebase Auth állapot változását
+    // Ez a megbízható módja a bejelentkezett felhasználó kezelésének
+    this.auth.onAuthStateChanged(async (firebaseUser) => {
+      if (firebaseUser) {
+        // Ha a Firebase Auth szerint be van jelentkezve, próbáljuk lekérni a profilját Firestore-b\u00f3l
+        const userDocRef = doc(this.firestore, 'users', firebaseUser.uid);
+        const userDocSnap = await getDoc(userDocRef);
 
-  private saveUsersToLocalStorage(users: User[]): void {
-    localStorage.setItem('users', JSON.stringify(users));
-  }
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          const user: User = {
+            email: userData['email'] || '',
+            nev: userData['name'] || '',
+            rendelesekSzama: userData['rendelesek_szama'] || 0,
+            profilkep: userData['photoURL'] || '',
+            uid: firebaseUser.uid
+          };
+          this.setUser(user); // Beállítjuk a felhasználót (frissíti a localStorage-t is)
+        } else {
+          // Ha Auth szerint be van jelentkezve, de nincs Firestore profil, kijelentkeztetjük
+          console.warn('Firebase Auth user found, but no Firestore profile. Logging out.');
+          this.logout();
+        }
+      } else {
+        // Ha nincs Firebase Auth user, töröljük a localStorage cache-t és beállítjuk null-ra
+        this.setUser(null);
+      }
+    });
+  }
 
-  // Módosítjuk, hogy sessionStorage-ot használjon localStorage helyett
-  private saveSessionToSessionStorage(email: string | null): void {
-    if (email) {
-      sessionStorage.setItem('currentUserEmail', email);
-    } else {
-      sessionStorage.removeItem('currentUserEmail');
-    }
-  }
+  // ÚJ METÓDUS: Felhasználó lekérése UID alapján a UserService segítségével
+  getUserById(uid: string): Observable<User | null> {
+    return this.userService.getUserById(uid);
+  }
 
-  // Töröljük az összes munkamenethez kapcsolódó adatot
-  private clearSessionStorage(): void {
-    sessionStorage.removeItem('currentUserEmail');
-  }
 
-  async register(email: string, password: string, name: string): Promise<void> {
-    try {
-      const users = this.loadUsersFromLocalStorage();
-      if (users.some(user => user.email === email)) {
-        throw new Error('Ez az email cím már használatban van.');
-      }
+  async register(email: string, password: string, name: string): Promise<{ success: boolean, message: string }> {
+    try {
+      // Ellenőrzés a Firestore-ban
+      const usersRef = collection(this.firestore, 'users');
+      const q = query(usersRef, where("email", "==", email));
+      const querySnapshot = await getDocs(q);
 
-      const firebaseUserCredential = await createUserWithEmailAndPassword(this.auth, email, password);
+      if (!querySnapshot.empty) {
+        return {
+          success: false,
+          message: 'Ez az email cím már regisztrálva van az adatbázisban!'
+        };
+      }
 
-      if (firebaseUserCredential?.user) {
-        const newUser: User = {
-          email: email,
-          jelszo: password,
-          nev: name,
-          rendelesekSzama: 0,
-          profilkep: '',
-          uid: firebaseUserCredential.user.uid
-        };
-        users.push(newUser);
-        this.saveUsersToLocalStorage(users);
-        // Bejelentkeztetjük a regisztráció után sessionStorage-ba
-        this.saveSessionToSessionStorage(email);
-        await this.createUserProfileInFirestore(firebaseUserCredential.user, name, password);
-        this.setUser(newUser);
-        this.router.navigate(['/home']);
-      } else {
-        throw new Error('Sikertelen regisztráció.');
-      }
-    } catch (error: any) {
-      throw error instanceof Error ? error : new Error('Ismeretlen hiba történt.');
-    }
-  }
+      // Firebase Authentication regisztráció
+      const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
+      const firebaseUser = userCredential.user;
 
-  async login(email: string, password: string): Promise<boolean> {
-    const users = this.loadUsersFromLocalStorage();
-    const user = users.find(u => u.email === email && u.jelszo === password);
+      // User dokumentum létrehozása Firestore-ban az UID-vel mint dokumentum ID
+      const userProfileData = {
+        email: email,
+        name: name,
+        photoURL: '',
+        rendelesek_szama: 0
+      };
+      await setDoc(doc(this.firestore, 'users', firebaseUser.uid), userProfileData);
 
-    if (user) {
-      // A sessionStorage-ba mentjük el a felhasználót localStorage helyett
-      this.saveSessionToSessionStorage(email);
-      this.setUser(user);
-      this.router.navigate(['/home']);
-      return true; // Sikeres bejelentkezés
-    } else {
-      this.setUser(null);
-      return false; // Sikertelen bejelentkezés
-    }
-  }
+      // Regisztráció sikeres
+      console.log('Regisztráció sikeres:', firebaseUser.email);
+      // Az onAuthStateChanged listener fogja beállítani a felhasználót a setUser-rel
+      return {
+        success: true,
+        message: 'Sikeres regisztráció!'
+      };
 
-  private async createUserProfileInFirestore(firebaseUser: FirebaseUser, name: string, password: string): Promise<void> {
-    try {
-      const usersRef = collection(this.firestore, 'users');
-      await addDoc(usersRef, {
-        uid: firebaseUser.uid,
-        email: firebaseUser.email,
-        jelszo: password,
-        name: name,
-        rendelesek_szama: 0,
-        photoURL: ''
-      });
-    } catch (error) {
-      throw new Error('Hiba a felhasználói profil létrehozása során.');
-    }
-  }
+    } catch (error: any) {
+      console.error('Regisztráció hiba:', error);
+      if (error.code === 'auth/email-already-in-use') {
+        return {
+          success: false,
+          message: 'Ez az email cím már használatban van a Firebase Authentication-ben.'
+        };
+      }
+      return {
+        success: false,
+        message: error.message || 'Hiba történt a regisztráció során.'
+      };
+    }
+  }
 
-  private async getUserProfile(email: string): Promise<void> {
-    const users = this.loadUsersFromLocalStorage();
-    const user = users.find(u => u.email === email);
-    this.setUser(user || null);
-    if (user) {
-      this.router.navigate(['/home']);
-    } else {
-      this.setUser(null);
-      throw new Error('Felhasználói profil nem található.');
-    }
-  }
+  async login(email: string, password: string): Promise<boolean> {
+    try {
+      // Firebase Authentication bejelentkezés
+      const userCredential = await signInWithEmailAndPassword(this.auth, email, password);
+      const firebaseUser = userCredential.user;
 
-  setUser(user: User | null): void {
-    this.currentUserSubject.next(user);
-  }
+      // Felhasználói profil dokumentum lekérése Firestore-b\u00f3l az UID alapján
+      const userDocRef = doc(this.firestore, 'users', firebaseUser.uid);
+      const userDocSnap = await getDoc(userDocRef);
 
-  logout(): Promise<boolean> {
-    this.setUser(null);
-    this.clearSessionStorage(); // Töröljük a session adatokat kijelentkezéskor
-    return signOut(this.auth).then(() => this.router.navigate(['/login']));
-  }
+      if (!userDocSnap.exists()) {
+        console.error('Felhasználó profil nem található a Firestore-ban az UID alapján.');
+        await signOut(this.auth);
+        return false;
+      }
 
-  updateUserName(email: string, newName: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const users = this.loadUsersFromLocalStorage();
-      const userIndex = users.findIndex(u => u.email === email);
-      if (userIndex > -1) {
-        users[userIndex].nev = newName;
-        this.saveUsersToLocalStorage(users);
-        const currentUser = this.currentUserSubject.value;
-        if (currentUser && currentUser.email === email) {
-          this.setUser({ ...currentUser, nev: newName });
-        }
-        resolve();
-      } else {
-        reject(new Error('Felhasználó nem található.'));
-      }
-    });
-  }
+      // Felhasználói adatok mappingje és beállítása
+      const userData = userDocSnap.data();
+      const user: User = {
+        email: userData['email'] || '',
+        nev: userData['name'] || '',
+        rendelesekSzama: userData['rendelesek_szama'] || 0,
+        profilkep: userData['photoURL'] || '',
+        uid: userDocSnap.id
+      };
+
+      // Felhasználó beállítása (frissíti a BehaviorSubject-et és a localStorage-t)
+      this.setUser(user);
+      console.log('Bejelentkezés sikeres:', user.email);
+      return true;
+    } catch (error: any) {
+      console.error('Bejelentkezési hiba:', error);
+      return false;
+    }
+  }
+
+  // Felhasználó beállítása (BehaviorSubject és localStorage)
+  setUser(user: User | null): void {
+    this.userSubject.next(user);
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('user');
+    }
+  }
+
+  async logout(): Promise<void> {
+    await signOut(this.auth);
+    this.router.navigate(['/login']);
+  }
+
+  // Ezek a metódusok a localStorage-t kezelik, de a Firebase Auth és Firestore a megbízható forrás
+  // Érdemes megfontolni, hogy ezekre valóban szükség van-e.
+  getStoredUsers(): User[] {
+    const storedUsers = localStorage.getItem('users');
+    return storedUsers ? JSON.parse(storedUsers) : [];
+  }
+
+  setStoredUsers(users: User[]): void {
+    localStorage.setItem('users', JSON.stringify(users));
+  }
 }

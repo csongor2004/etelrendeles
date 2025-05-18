@@ -1,28 +1,28 @@
 <div class="login-container">
-  <h2>Bejelentkezés</h2>
-  <form [formGroup]="loginForm" (ngSubmit)="login()">
-    <mat-form-field appearance="outline" floatLabel="always">
-      <mat-label>Email</mat-label>
-      <input matInput formControlName="email">
-      <mat-error *ngIf="loginForm.get('email')?.hasError('required')">Az email cím megadása kötelező.</mat-error>
-      <mat-error *ngIf="loginForm.get('email')?.hasError('email')">Érvényes email címet adj meg.</mat-error>
-    </mat-form-field>
+  <h2>Bejelentkezés</h2>
+  <form [formGroup]="loginForm" (ngSubmit)="login()">
+    <mat-form-field appearance="outline" floatLabel="always">
+      <mat-label>Email</mat-label>
+      <input matInput formControlName="email">
+      <mat-error *ngIf="loginForm.get('email')?.hasError('required')">Az email cím megadása kötelező.</mat-error>
+      <mat-error *ngIf="loginForm.get('email')?.hasError('email')">Érvényes email címet adj meg.</mat-error>
+    </mat-form-field>
 
-    <mat-form-field appearance="outline" floatLabel="always">
-      <mat-label>Jelszó</mat-label>
-      <input matInput type="password" formControlName="password">
-      <mat-error *ngIf="loginForm.get('password')?.hasError('required')">A jelszó megadása kötelező.</mat-error>
-    </mat-form-field>
+    <mat-form-field appearance="outline" floatLabel="always">
+      <mat-label>Jelszó</mat-label>
+      <input matInput type="password" formControlName="password">
+      <mat-error *ngIf="loginForm.get('password')?.hasError('required')">A jelszó megadása kötelező.</mat-error>
+    </mat-form-field>
 
-    <button mat-raised-button color="primary" type="submit" [disabled]="loading">
-      <mat-spinner *ngIf="loading" diameter="24"></mat-spinner>
-      <span *ngIf="!loading">Bejelentkezés</span>
-    </button>
+    <button mat-raised-button color="primary" type="submit" [disabled]="loading">
+      <mat-spinner *ngIf="loading" diameter="24"></mat-spinner>
+      <span *ngIf="!loading">Bejelentkezés</span>
+    </button>
 
-    <div *ngIf="errorMessage" class="error-message">
-      {{ errorMessage }}
-    </div>
-  </form>
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+  </form>
 
-  <button mat-button (click)="navigateToRegister()" style="margin-top: 1rem;">Nincs még fiókod? Regisztrálj!</button>
+  <button mat-button (click)="navigateToRegister()" style="margin-top: 1rem;">Nincs még fiókod? Regisztrálj!</button>
 </div>

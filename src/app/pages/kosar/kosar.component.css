@@ -1,43 +1,127 @@
-.kosar-kartya, .ures-kosar-kartya {
-    margin-top: 20px;
+/* ------------------------
+   kosar.component.css
+   ------------------------ */
+
+.kosar-container {
+  width: 100%;
+  max-width: 100%;
+  padding: 16px;
+}
+
+.kosar-kartya,
+.ures-kosar-kartya {
+  margin-top: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+}
+
+/* ====================================
+   KOSÁR SOROK – FLEX LAYOUT
+   ==================================== */
+.kosar-tetel {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+  width: 100%;
+}
+
+.kosar-tetel:last-child {
+  border-bottom: none;
+}
+
+.tetel-info {
+  flex: 1;
+  margin-right: 8px;
+}
+
+.tetel-nev {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.tetel-ar {
+  color: #555;
+  font-size: 0.9em;
+}
+
+.tetel-mennyiseg {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tetel-mennyiseg span {
+  margin: 0 8px;
+  font-size: 1.1em;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* ============================
+   „Összesen" SOR
+   ============================ */
+.osszesen {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  margin-top: 16px;
+  border-top: 1px solid #eee;
+  font-size: 18px;
+  font-weight: bold;
+  width: 100%;
+}
+
+.rendeles-button {
+  margin-top: 16px;
+  width: 100%;
+}
+
+/* Üres kosár stílusok */
+.ures-kosar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+  color: rgba(0, 0, 0, 0.54);
+  width: 100%;
+}
+
+.ures-kosar mat-icon {
+  font-size: 48px;
+  height: 48px;
+  width: 48px;
+  margin-bottom: 16px;
+}
+
+/* --------------------------------
+   Mobil responsív szabályok
+   -------------------------------- */
+@media (max-width: 768px) {
+  .kosar-tetel {
+    flex-direction: column;
+    align-items: flex-start;
   }
-  
-  .kosar-tabla {
+
+  .tetel-info {
+    margin-right: 0;
+    margin-bottom: 8px;
     width: 100%;
   }
-  
-  .osszesen {
-    margin-top: 16px;
-    display: flex;
+
+  .tetel-mennyiseg {
+    width: 100%;
     justify-content: space-between;
-    align-items: center;
-    font-size: 18px;
   }
-  
-  .ures-kosar {
-    display: flex;
+
+  .osszesen {
     flex-direction: column;
-    align-items: center;
-    padding: 24px;
-    color: rgba(0, 0, 0, 0.54);
+    align-items: flex-start;
+    gap: 10px;
   }
-  
-  .ures-kosar mat-icon {
-    font-size: 48px;
-    height: 48px;
-    width: 48px;
-    margin-bottom: 16px;
-  }
-  
-  /* Reszponzív megjelenés */
-  @media (max-width: 768px) {
-    .osszesen {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    
-    .osszesen button {
-      margin-top: 12px;
-      width: 100%;
-    }
-  }
+}

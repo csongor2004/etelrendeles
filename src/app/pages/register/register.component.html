@@ -1,39 +1,40 @@
 <div class="register-container">
-  <h1>Fiók létrehozása</h1>
-  <form class="register-form" [formGroup]="registerForm" (ngSubmit)="register()">
+  <h1>Fiók létrehozása</h1>
+  <form class="register-form" [formGroup]="registerForm" (ngSubmit)="register()">
 
-    <mat-form-field appearance="outline" floatLabel="always">
-      <mat-label>Email</mat-label>
-      <input matInput formControlName="email">
-      <mat-error *ngIf="registerForm.get('email')?.hasError('required')">Az email cím megadása kötelező.</mat-error>
-      <mat-error *ngIf="registerForm.get('email')?.hasError('email')">Érvényes email címet adj meg.</mat-error>
-    </mat-form-field>
+    <mat-form-field appearance="outline" floatLabel="always">
+      <mat-label>Email</mat-label>
+      <input matInput formControlName="email">
+      <mat-error *ngIf="registerForm.get('email')?.hasError('required')">Az email cím megadása kötelező.</mat-error>
+      <mat-error *ngIf="registerForm.get('email')?.hasError('email')">Érvényes email címet adj meg.</mat-error>
+    </mat-form-field>
 
-    <mat-form-field appearance="outline" floatLabel="always">
-      <mat-label>Jelszó</mat-label>
-      <input matInput type="password" formControlName="password">
-      <mat-error *ngIf="registerForm.get('password')?.hasError('required')">A jelszó megadása kötelező.</mat-error>
-      <mat-error *ngIf="registerForm.get('password')?.hasError('minlength')">A jelszónak legalább 6 karakter hosszúnak kell lennie.</mat-error>
-    </mat-form-field>
+    <mat-form-field appearance="outline" floatLabel="always">
+      <mat-label>Jelszó</mat-label>
+      <input matInput type="password" formControlName="password">
+      <mat-error *ngIf="registerForm.get('password')?.hasError('required')">A jelszó megadása kötelező.</mat-error>
+      <mat-error *ngIf="registerForm.get('password')?.hasError('minlength')">A jelszónak legalább 6 karakter hosszúnak kell lennie.</mat-error>
+    </mat-form-field>
 
-    <mat-form-field appearance="outline" floatLabel="always">
-      <mat-label>Jelszó megerősítése</mat-label>
-      <input matInput type="password" formControlName="rePassword">
-      <mat-error *ngIf="registerForm.get('rePassword')?.hasError('required')">A jelszó megerősítése kötelező.</mat-error>
-    </mat-form-field>
+    <mat-form-field appearance="outline" floatLabel="always">
+      <mat-label>Jelszó megerősítése</mat-label>
+      <input matInput type="password" formControlName="rePassword">
+      <mat-error *ngIf="registerForm.get('rePassword')?.hasError('required')">A jelszó megerősítése kötelező.</mat-error>
+            <mat-error *ngIf="registerForm.get('rePassword')?.hasError('passwordMismatch')">A jelszavak nem egyeznek meg.</mat-error>
+    </mat-form-field>
 
-    <mat-form-field appearance="outline" floatLabel="always">
-      <mat-label>Név</mat-label>
-      <input matInput formControlName="name">
-      <mat-error *ngIf="registerForm.get('name')?.hasError('required')">A név megadása kötelező.</mat-error>
-      <mat-error *ngIf="registerForm.get('name')?.hasError('minlength')">A névnek legalább 2 karakter hosszúnak kell lennie.</mat-error>
-    </mat-form-field>
+    <mat-form-field appearance="outline" floatLabel="always">
+      <mat-label>Név</mat-label>
+      <input matInput formControlName="name">
+      <mat-error *ngIf="registerForm.get('name')?.hasError('required')">A név megadása kötelező.</mat-error>
+      <mat-error *ngIf="registerForm.get('name')?.hasError('minlength')">A névnek legalább 2 karakter hosszúnak kell lennie.</mat-error>
+    </mat-form-field>
 
-    <div *ngIf="registerError" class="error-message">{{ registerError }}</div>
+    <div *ngIf="registerError" class="error-message">{{ registerError }}</div>
 
-    <div class="buttons-row">
-      <button mat-flat-button color="primary" type="submit" [disabled]="isLoading">Regisztráció</button>
-      <button mat-flat-button type="button" (click)="navigateToLogin()">Bejelentkezés</button>
-    </div>
-  </form>
+    <div class="buttons-row">
+      <button mat-flat-button color="primary" type="submit" [disabled]="isLoading">Regisztráció</button>
+      <button mat-flat-button type="button" (click)="navigateToLogin()">Bejelentkezés</button>
+    </div>
+  </form>
 </div>

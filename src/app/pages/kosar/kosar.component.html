@@ -1,57 +1,57 @@
+<!-- kosar.component.html -->
 <div class="kosar-container">
   <form [formGroup]="kosarForm" (ngSubmit)="submitOrder()">
     <div *ngIf="tetelek.length === 0" class="ures-kosar">
-      A kosár üres
+      <mat-icon>shopping_cart</mat-icon>
+      <span>A kosár üres</span>
     </div>
 
-    <div *ngIf="tetelek.length > 0" class="kosar-tetelek">
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>Kosár tartalma</mat-card-title>
-        </mat-card-header>
-        
-        <mat-card-content>
-          <div formArrayName="tetelek">
-            <div *ngFor="let tetelForm of tetelekArray.controls; let i = index" 
-                 [formGroupName]="i" 
-                 class="kosar-tetel">
-              <div class="tetel-info">
-                <span class="tetel-nev">{{ tetelForm.get('nev')?.value }}</span>
-                <span class="tetel-ar">{{ tetelForm.get('ar')?.value * tetelForm.get('mennyiseg')?.value }} Ft</span>
-              </div>
+    <mat-card *ngIf="tetelek.length > 0" class="kosar-kartya">
+      <mat-card-header>
+        <mat-card-title>Kosár tartalma</mat-card-title>
+      </mat-card-header>
 
-              <div class="tetel-mennyiseg">
-                <button type="button" mat-icon-button (click)="csokkentMennyiseg(i)">
-                  <mat-icon>remove</mat-icon>
-                </button>
-                <span>{{ tetelForm.get('mennyiseg')?.value }}</span>
-                <button type="button" mat-icon-button (click)="novelMennyiseg(i)">
-                  <mat-icon>add</mat-icon>
-                </button>
-                <button type="button" mat-icon-button color="warn" (click)="tetelTorlese(tetelForm.get('id')?.value)">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </div>
-              <mat-divider *ngIf="i < tetelekArray.length - 1"></mat-divider>
+      <mat-card-content>
+        <div formArrayName="tetelek">
+          <div *ngFor="let tetelForm of tetelekArray.controls; let i = index"
+               [formGroupName]="i"
+               class="kosar-tetel">
+            <div class="tetel-info">
+              <span class="tetel-nev">{{ tetelForm.get('nev')?.value }}</span>
+              <span class="tetel-ar">{{ tetelForm.get('ar')?.value * tetelForm.get('mennyiseg')?.value }} Ft</span>
+            </div>
+
+            <div class="tetel-mennyiseg">
+              <button type="button" mat-icon-button (click)="csokkentMennyiseg(i)">
+                <mat-icon>remove</mat-icon>
+              </button>
+              <span>{{ tetelForm.get('mennyiseg')?.value }}</span>
+              <button type="button" mat-icon-button (click)="novelMennyiseg(i)">
+                <mat-icon>add</mat-icon>
+              </button>
+              <button type="button" mat-icon-button color="warn" (click)="tetelTorlese(tetelForm.get('id')?.value)">
+                <mat-icon>delete</mat-icon>
+              </button>
             </div>
           </div>
+        </div>
 
-          <div class="osszesen">
-            <strong>Összesen:</strong> {{ getOsszesen() }} Ft
-          </div>
-        </mat-card-content>
-        
-        <mat-card-actions>
-          <button 
-            mat-raised-button 
-            color="accent" 
-            type="submit" 
-            [disabled]="tetelek.length === 0"
-            class="rendeles-button">
-            Rendelés leadása
-          </button>
-        </mat-card-actions>
-      </mat-card>
-    </div>
+        <div class="osszesen">
+          <span>Összesen:</span>
+          <span>{{ getOsszesen() }} Ft</span>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button
+          mat-raised-button
+          color="accent"
+          type="submit"
+          [disabled]="tetelek.length === 0"
+          class="rendeles-button">
+          Rendelés leadása
+        </button>
+      </mat-card-actions>
+    </mat-card>
   </form>
 </div>

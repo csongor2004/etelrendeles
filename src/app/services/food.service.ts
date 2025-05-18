@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 
 import { Observable, of } from 'rxjs';
 
-import { FirebaseService } from '../firebase.service';
+import { FirebaseService } from '../../firebase.service';
 
 import { AuthService } from './auth.service';
 
@@ -51,7 +51,7 @@ export class FoodService {
   }
 
 
-
+  // JAVÍTVA: Hívja a FirebaseService-t a rendelés mentéséhez a tételek NÉLKÜL
   addOrderToFirebase(tetelek: KosarTetel[], totalAmount: number): Observable<void> {
 
     return this.authService.currentUserProfile$.pipe(
@@ -63,12 +63,13 @@ export class FoodService {
         if (!user?.email) throw new Error('Be kell jelentkezni');
 
 
-
-        return this.firebaseService.rendelesMentese(tetelek, totalAmount, user.email);
+        // Hívjuk a FirebaseService rendelesMentese metódusát a tételek NÉLKÜL
+        // Az interface kérésnek megfelelően csak az összeg és email kerül átadásra.
+        return this.firebaseService.rendelesMentese(totalAmount, user.email); // Eltávolítva a 'tetelek' paraméter
 
       }),
 
-      switchMap(() => of(undefined))
+      switchMap(() => of(undefined)) // Konvertáljuk a string Observable-t void Observable-re
 
     );
 
